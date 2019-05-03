@@ -25,6 +25,10 @@ Route::prefix('1')->group(function () {
     Route::apiResource('books', 'BookController');
     Route::post('books/{book}/ratings', 'RatingController@store');
 
+    Route::prefix('dashboard')->group(function () {
+        Route::apiResource('promo', 'Dashboard\PromoController');
+    });
+
 });
 
 

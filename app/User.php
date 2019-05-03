@@ -20,6 +20,11 @@ class User extends Authenticatable implements JWTSubject
         'name', 'email', 'password',
     ];
 
+    public $with = [
+        'promo'
+    ];
+
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -61,5 +66,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+
+    public function promo() {
+        return $this->belongsTo(Promo::class);
     }
 }

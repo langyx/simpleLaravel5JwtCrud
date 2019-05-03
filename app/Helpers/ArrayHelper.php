@@ -33,4 +33,23 @@ class ArrayHelper
 
         return count( $keys ) === $count;
     }
+
+    /**
+     * Find a user using the user identifier in the subject claim.
+     *
+     * @param bool|string $token
+     *
+     * @return mixed
+     */
+
+    public function toUser($token = false)
+    {
+        $payload = $this->getPayload($token);
+
+        if (! $user = $this->user->getBy($this->identifier, $payload['sub'])) {
+            return false;
+        }
+
+        return $user;
+    }
 }
