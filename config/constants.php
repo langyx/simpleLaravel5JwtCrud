@@ -10,5 +10,8 @@ return [
         'admin' => '3',
         'mod'   => '2',
         'user'  => '1',
+    ],
+    'message' => [
+        'notRight' => 'Vous n\'avez pas le droit de réaliser cette opération.',
     ]
 ];

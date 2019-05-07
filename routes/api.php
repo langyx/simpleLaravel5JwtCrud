@@ -19,9 +19,13 @@ use Illuminate\Http\Request;
 
 Route::prefix('1')->group(function () {
 
-    Route::post('register', 'AuthController@register');
-    Route::post('login', 'AuthController@login');
-    Route::get('logout', 'AuthController@logout');
+    Route::prefix('user')->group(function () {
+        Route::post('register'          , 'AuthController@register');
+        Route::post('login'             , 'AuthController@login');
+        Route::get('logout'             , 'AuthController@logout');
+        Route::put('update/{user}'      , 'AuthController@update');
+    });
+
 
     Route::apiResource('books', 'BookController');
     Route::post('books/{book}/ratings', 'RatingController@store');

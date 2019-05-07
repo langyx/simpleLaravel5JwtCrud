@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\UserHelper;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Config;
+
 
 use Validator;
 
+
 class AuthController extends Controller
 {
-
-    //TODO: Api Change user level
 
     public function __construct()
     {
@@ -22,8 +24,66 @@ class AuthController extends Controller
         $this->middleware('auth:api')->except(['register' , 'login']);
     }
 
+    /**
+     * @param Request $request
+     * @param User $user
+     * @return UserResource|\Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, User $user)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'email'     => 'required|string|email|max:255',
+            'name'      => 'required',
+            'password'  => 'required',
+            'level'     => 'required',
+            'promo_id'  => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+        $updatedFields = ['email', 'name', 'password'];
+
+        $request->merge(['password' => bcrypt($request->password)]);
+
+        $loggedUser     =   UserHelper::getJwtUser();
+
+        switch ($loggedUser->level)
+        {
+            case Config::get('constants.level.admin'):
+                array_push($updatedFields, 'promo_id', 'level');
+                break;
+
+            case Config::get('constants.level.mod'):
+                if (empty($user->promo) || $user->promo->modo_id != $loggedUser->id)
+                {
+                    return response()->json(['msg' => Config::get('constants.message.notRight')], 403);
+                }
+                array_push($updatedFields, 'promo_id');
+                break;
+
+            default:
+                if ($user->id != $loggedUser->id)
+                {
+                    return response()->json(['msg' => Config::get('constants.message.notRight')], 403);
+                }
+                break;
+        }
+
+        $user->update($request->only($updatedFields));
+        return new UserResource($user);
+
+    }
+
     public function register(Request $request)
     {
+        /**
+         * Check if user is logged
+         */
+        if (!empty(JWTAuth::getToken()))
+        {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
       $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users',
             'name' => 'required',
