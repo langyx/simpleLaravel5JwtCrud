@@ -70,6 +70,10 @@ class User extends Authenticatable implements JWTSubject
 
 
     public function promo() {
-        return $this->belongsTo(Promo::class);
+        return $this->belongsTo(Promo::class, 'promo_id');
+    }
+
+    public function modoPromos(){
+        return $this->hasMany(Promo::class);
     }
 }

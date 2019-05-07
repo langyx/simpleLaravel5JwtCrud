@@ -26,9 +26,11 @@ class PromoRessource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'promo_type_id' => $this->promo_type_id,
+            'promo_type' => $this->promoType,
             'created_at' => (string) $this->created_at,
             'updated_at' => (string) $this->updated_at,
             'users' => $this->users,
+            'modo_id' => $this->modo_id,
         ];
     }
 }

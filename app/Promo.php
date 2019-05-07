@@ -22,4 +22,9 @@ class Promo extends Model
     {
         return $this->belongsTo(PromoType::class, "promo_type_id");
     }
+
+    public function modo()
+    {
+        return $this->belongsTo(User::class, "modo_id");
+    }
 }

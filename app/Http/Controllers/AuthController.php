@@ -2,18 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
 use App\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use Validator;
+
 class AuthController extends Controller
 {
-    //
+
+    //TODO: Api Change user level
+
+    public function __construct()
+    {
+        /**
+         * Only logged can enter
+         */
+        $this->middleware('auth:api')->except(['register' , 'login']);
+    }
+
     public function register(Request $request)
     {
-        if (count(User::where('email', $request->email)->get()))
-        {
-            return response()->json(['error' => 'Unauthorized'], 401);
+      $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users',
+            'name' => 'required',
+            'password'=> 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
         }
         $user = User::create([
             'name' => $request->name,
@@ -28,6 +45,13 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password'=> 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
         $credentials = $request->only(['email', 'password']);
 
         if ($token = JWTAuth::attempt($credentials)) {
@@ -35,6 +59,17 @@ class AuthController extends Controller
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    /**
+     * Method get
+     * Logout user by his jwt token
+     * @return mixed
+     */
+    public function logout()
+    {
+        return (JWTAuth::invalidate(JWTAuth::getToken()));
+
     }
 
     protected function respondWithToken($token)
